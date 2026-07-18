@@ -124,7 +124,7 @@ app.get('/api/analysis/:id', async (req, res) => {
     console.log("Verification successful. Querying Gemini for analysis...");
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       contents: `Generate a premium, comprehensive sports betting analysis for the upcoming tournament match: ${matchDetails.homeTeam} vs ${matchDetails.awayTeam}. Focus heavily on structural tactical setups and metric trends.`,
       config: {
         systemInstruction: "You are an elite football metrics analyst and sports oracle. Provide razor-sharp, analytical insights tracking team form, key tactical matchups, set-piece variance, and expected goals (xG) profiles. Conclude with a clear, logical, and reasoned prediction.",
