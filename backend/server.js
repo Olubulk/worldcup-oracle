@@ -6,7 +6,7 @@
 
 import "dotenv/config";
 import express from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import cors from 'cors';
 import { ethers } from "ethers";
 
@@ -32,17 +32,20 @@ app.use(cors({
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const anthropic = new Anthropic(); // reads ANTHROPIC_API_KEY from env
+
+// Initialize the Gemini client using your environment variable
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY 
+});
 
 // ---------------------------------------------------------------
 // In-memory match store — mirrors on-chain matches for fast reads.
 // In production, sync this from contract events instead of duplicating state by hand.
 // ---------------------------------------------------------------
-// 📑 Update this block in backend/server.js
 const matches = {
   "0": { homeTeam: "Argentina", awayTeam: "France", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
   "1": { homeTeam: "Brazil", awayTeam: "Germany", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
-  "2": { homeTeam: "England", awayTeam: "Spain", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" }, // <-- Added this!
+  "2": { homeTeam: "England", awayTeam: "Spain", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
 };
 
 // ---------------------------------------------------------------
@@ -59,11 +62,7 @@ app.get("/api/matches/:matchId", (req, res) => {
 });
 
 // ---------------------------------------------------------------
-// ---------------------------------------------------------------
-// Paid route — Verified Anthropic Generation Engine
-// ---------------------------------------------------------------
-// ---------------------------------------------------------------
-// Paid route — Cleaned Lookup & Generation Engine
+// Paid route — Verified Gemini Generation Engine
 // ---------------------------------------------------------------
 app.get('/api/analysis/:id', async (req, res) => {
   const signatureHeader = req.headers['payment-signature'];
@@ -100,22 +99,20 @@ app.get('/api/analysis/:id', async (req, res) => {
       return res.status(401).json({ error: "Invalid signature or unauthorized wallet" });
     }
 
-    console.log("Verification successful. Querying Anthropic for analysis...");
+    console.log("Verification successful. Querying Gemini for analysis...");
 
-    // Update the configuration block inside backend/server.js
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-5", // Or whichever active identifier you used
-      max_tokens: 1000,
-      system: "You are an elite football metrics analyst and sports oracle. Provide razor-sharp, analytical insights tracking team form, key tactical matchups, set-piece variance, and expected goals (xG) profiles. Conclude with a clear, logical, and reasoned prediction.",
-      messages: [
-        {
-          role: "user",
-          content: `Generate a premium, comprehensive sports betting analysis for the upcoming tournament match: ${matchDetails.homeTeam} vs ${matchDetails.awayTeam}. Focus heavily on structural tactical setups and metric trends.`
-        }
-      ]
+    // Generate content using the new Google Gen AI SDK syntax and free-tier flash model
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Generate a premium, comprehensive sports betting analysis for the upcoming tournament match: ${matchDetails.homeTeam} vs ${matchDetails.awayTeam}. Focus heavily on structural tactical setups and metric trends.`,
+      config: {
+        systemInstruction: "You are an elite football metrics analyst and sports oracle. Provide razor-sharp, analytical insights tracking team form, key tactical matchups, set-piece variance, and expected goals (xG) profiles. Conclude with a clear, logical, and reasoned prediction.",
+        temperature: 0.7,
+      }
     });
 
-    const verifiedAnalysis = response.content[0].text;
+    // Safely extract the generated prediction text
+    const verifiedAnalysis = response.text;
     
     return res.json({
       message: "Payment verified successfully",
