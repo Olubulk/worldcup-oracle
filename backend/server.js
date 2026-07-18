@@ -29,6 +29,9 @@ app.use(cors({
   credentials: true
 }));
 
+// Handle preflight OPTIONS requests globally across all routes
+app.options('*', cors());
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
