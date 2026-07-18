@@ -328,8 +328,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-line/10 px-6 py-4 text-center">
         <p className="font-mono text-[11px] text-chalk/40">
-          Demo build on Injective testnet. Stakes and analysis are simulated in this UI —
-          wire the contract address and backend URL before going live.
+          Live on Injective testnet — real staking, real x402 micropayment.
         </p>
       </footer>
     </div>
