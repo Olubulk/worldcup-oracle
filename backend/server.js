@@ -29,8 +29,13 @@ app.use(cors({
   credentials: true
 }));
 
-// Handle preflight OPTIONS requests globally across all routes
-app.options('*', cors());
+// Express 5 compatible middleware to catch and immediately resolve preflight OPTIONS requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json());
 
