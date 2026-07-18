@@ -3,6 +3,7 @@
 //
 // Free endpoints: match list, odds/pool sizes (drives engagement, no paywall)
 // Paid endpoint:  /api/analysis/:matchId — AI-generated prediction writeup, 0.05 USDC/request
+// Admin endpoint: /api/admin/settle-match — Fast-pass match state resolution
 
 import "dotenv/config";
 import express from "express";
@@ -64,9 +65,9 @@ const ai = new GoogleGenAI({
 // In production, sync this from contract events instead of duplicating state by hand.
 // ---------------------------------------------------------------
 const matches = {
-  "0": { homeTeam: "Argentina", awayTeam: "France", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
-  "1": { homeTeam: "Brazil", awayTeam: "Germany", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
-  "2": { homeTeam: "England", awayTeam: "Spain", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
+  "0": { homeTeam: "Argentina", awayTeam: "France", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0", status: "Open" },
+  "1": { homeTeam: "Brazil", awayTeam: "Germany", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0", status: "Open" },
+  "2": { homeTeam: "England", awayTeam: "Spain", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0", status: "Open" },
 };
 
 // ---------------------------------------------------------------
@@ -156,6 +157,49 @@ app.get('/api/analysis/:id', async (req, res) => {
       details: error.message 
     });
   } 
+});
+
+// ---------------------------------------------------------------
+// Hackathon Fast-Pass: Administrative Match Settlement
+// ---------------------------------------------------------------
+app.post('/api/admin/settle-match', (req, res) => {
+  const { matchId, homeScore, awayScore, adminSecret } = req.body;
+
+  // 1. Quick security check to prevent unauthorized calls
+  if (adminSecret !== "hackathon_super_secret_2026") {
+    return res.status(403).json({ error: "Unauthorized access token." });
+  }
+
+  // 2. Locate the match in your current in-memory store
+  const matchDetails = matches[matchId];
+  if (!matchDetails) {
+    return res.status(404).json({ error: "Target match identity not found." });
+  }
+
+  // 3. Determine the structural outcome
+  let outcome = "draw";
+  if (Number(homeScore) > Number(awayScore)) outcome = "home";
+  if (Number(awayScore) > Number(homeScore)) outcome = "away";
+
+  // 4. Update the state dynamically in memory without restarting the server
+  matchDetails.status = "Settled";
+  matchDetails.finalScore = `${homeScore}-${awayScore}`;
+  matchDetails.winningOutcome = outcome;
+
+  console.log(`[Admin] Successfully settled Match ${matchId}: ${matchDetails.homeTeam} vs ${matchDetails.awayTeam} (${homeScore}-${awayScore})`);
+
+  // 5. Return a simulated successful transaction hash for your Loom demo
+  return res.json({
+    success: true,
+    message: "Match state successfully settled on the oracle network.",
+    data: {
+      matchId,
+      status: matchDetails.status,
+      finalScore: matchDetails.finalScore,
+      winningOutcome: matchDetails.winningOutcome,
+      simulatedTxHash: "0x" + [...Array(64)].map(() => Math.floor(Math.random()*16).toString(16)).join('')
+    }
+  });
 });
 
 // --- THE SERVER START ---
