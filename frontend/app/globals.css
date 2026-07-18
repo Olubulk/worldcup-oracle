@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --color-pitch: #0f3d2e;
+  --color-pitch-deep: #0a2b21;
+  --color-chalk: #f5f3ea;
+  --color-floodlight: #ffc933;
+  --color-home: #c4432b;
+  --color-away: #2f5d8a;
+  --color-line: #e8e5d8;
+  --color-ink: #12211b;
+}
+
+@theme inline {
+  --color-pitch: var(--color-pitch);
+  --color-pitch-deep: var(--color-pitch-deep);
+  --color-chalk: var(--color-chalk);
+  --color-floodlight: var(--color-floodlight);
+  --color-home: var(--color-home);
+  --color-away: var(--color-away);
+  --color-line: var(--color-line);
+  --color-ink: var(--color-ink);
+  --font-display: var(--font-oswald);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--color-pitch-deep);
+  color: var(--color-chalk);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Scoreboard LED-style digit rendering for pool numbers */
+.scoreboard-digits {
+  font-family: var(--font-display), sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Perforated ticket-stub edge on match cards */
+.ticket-edge {
+  position: relative;
+}
+.ticket-edge::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-image: radial-gradient(circle, var(--color-pitch-deep) 2px, transparent 2.5px);
+  background-size: 14px 1px;
+  background-repeat: repeat-x;
+}
+
+.stake-segment {
+  transition: flex-basis 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
