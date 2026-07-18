@@ -42,6 +42,7 @@ app.use(cors({
   credentials: true
 }));
 
+// Express 5 compatible middleware to catch and immediately resolve preflight OPTIONS requests
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
@@ -53,16 +54,24 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
+// Initialize the Gemini client using your environment variable
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY 
 });
 
+// ---------------------------------------------------------------
+// In-memory match store — mirrors on-chain matches for fast reads.
+// In production, sync this from contract events instead of duplicating state by hand.
+// ---------------------------------------------------------------
 const matches = {
   "0": { homeTeam: "Argentina", awayTeam: "France", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
   "1": { homeTeam: "Brazil", awayTeam: "Germany", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
   "2": { homeTeam: "England", awayTeam: "Spain", kickoffTime: null, totalHome: "0", totalAway: "0", totalDraw: "0" },
 };
 
+// ---------------------------------------------------------------
+// Free routes
+// ---------------------------------------------------------------
 app.get("/api/matches", (req, res) => {
   res.json({ matches });
 });
@@ -73,6 +82,9 @@ app.get("/api/matches/:matchId", (req, res) => {
   res.json(m);
 });
 
+// ---------------------------------------------------------------
+// Paid route — Verified Gemini Generation Engine
+// ---------------------------------------------------------------
 app.get('/api/analysis/:id', async (req, res) => {
   const signatureHeader = req.headers['payment-signature'];
   const matchId = req.params.id;
@@ -93,17 +105,14 @@ app.get('/api/analysis/:id', async (req, res) => {
   try {
     console.log("--> Raw signatureHeader received:", signatureHeader);
     
-    // 1. Decode payload
+    // 1. Decode payload from custom base64 header
     const base64Decoded = Buffer.from(signatureHeader, 'base64').toString('utf-8');
-    console.log("--> Base64 Decoded string:", base64Decoded);
-    
     const decodedJSON = decodeURIComponent(base64Decoded);
-    console.log("--> URI Decoded string:", decodedJSON);
     
     const envelope = JSON.parse(decodedJSON);
     console.log("--> Parsed Envelope JSON Object:", envelope);
 
-    // Dynamic extraction check in case structural fields are nested differently
+    // Dynamic extraction fallback in case structural fields are nested differently
     const payloadData = envelope.payload || envelope;
     const { signature, message } = payloadData;
     const userAddress = payloadData.from || payloadData.signer;
@@ -121,8 +130,9 @@ app.get('/api/analysis/:id', async (req, res) => {
       return res.status(401).json({ error: "Invalid signature or unauthorized wallet" });
     }
 
-    console.log("Verification successful. Querying Gemini for analysis...");
+    console.log("Verification successful. Querying Gemini 3.5 for analysis...");
 
+    // Generate content using the current active Gemini 3.5 Flash engine
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: `Generate a premium, comprehensive sports betting analysis for the upcoming tournament match: ${matchDetails.homeTeam} vs ${matchDetails.awayTeam}. Focus heavily on structural tactical setups and metric trends.`,
@@ -148,6 +158,7 @@ app.get('/api/analysis/:id', async (req, res) => {
   } 
 });
 
+// --- THE SERVER START ---
 app.listen(PORT, () => {
   console.log(`Backend server running cleanly on port ${PORT}`);
 });
