@@ -4,6 +4,15 @@ World Cup Oracle is a decentralized, pay-per-view sports prediction marketplace 
 
 By introducing an innovative x402-inspired payment routing loop combined with an autonomous AI Sports Analyst Agent, World Cup Oracle lets users instantly unlock elite, institutional-grade tactical match previews using zero-friction cryptographic wallet signatures and micro-token transactions.
 
+<B>Tech stack</B>
+
+∆ Smart contract: Solidity, deployed on Injective EVM testnet — handles staking, match lifecycle (open → locked → settled), and proportional payout logic
+∆ Payments: Injective's x402 protocol for per-request micropayments gating AI analysis
+Cross-chain funding: Circle's CCTP for native USDC transfer into Injective from other chains
+∆ AI analysis: Claude API, generating match previews on unlock
+∆ Backend: Node.js / Express
+∆ Frontend: Next.js, deployed on Vercel
+∆ Backend hosting: Render
 
 🚀 Live Links & Submissions
 Live Web Application: worldcup-oracle-six.vercel.app
@@ -132,6 +141,13 @@ npm run dev
 
 Follow the `TODO` comments at the top of `app/page.tsx` — mainly swapping the mock
 match array for a contract read, and wiring wallet connect.
+
+What's real vs. scoped for the hackathon
+Being upfront about this rather than letting a judge discover it:
+
+Match settlement is admin-triggered based on real-world results, not a fully decentralized oracle — building a trustless sports oracle is a substantial project on its own
+CCTP is implemented and testable via the included scripts; [not yet wired into the live UI's staking flow / or: shown live in the demo — adjust based on final state]
+Match data (teams, kickoff times, initial odds display) is currently seeded rather than pulled from a live sports data API
 
 
 Developed with passion for the Injective Global Cup Hackathon 2026.
