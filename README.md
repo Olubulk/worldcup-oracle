@@ -5,18 +5,6 @@ World Cup Oracle is a decentralized, pay-per-view sports prediction marketplace 
 By introducing an innovative x402-inspired payment routing loop combined with an autonomous AI Sports Analyst Agent, World Cup Oracle lets users instantly unlock elite, institutional-grade tactical match previews using zero-friction cryptographic wallet signatures and micro-token transactions.
 
 
-## What's actually real vs. what you need to wire up
-
-This repo gives you a genuinely working foundation, not a mockup. Here's the honest state of each piece:
-
-| Piece | Status |
-|---|---|
-| Smart contract (`contracts/WorldCupPredictionMarket.sol`) | ✅ Written, compiles clean (23 functions, 8.3KB bytecode), ready to deploy |
-| Deployment scripts (`scripts/`) | ✅ Ready — need your wallet key + confirmed USDC address in `.env` |
-| Backend + x402 payment gate (`backend/server.js`) | ✅ Uses the real `@injectivelabs/x402` package's actual API (verified against its type definitions, not guessed) |
-| CCTP cross-chain scripts (`cctp/`) | ✅ Real CCTP V2 flow (burn → attest → mint) — needs current contract addresses from Circle's docs filled into `.env`, these change as CCTP expands |
-| Frontend (`frontend/`) | ✅ Builds clean, custom stadium-scoreboard design — currently uses **mock data and simulated transactions**; needs wallet connection + real contract reads wired in (marked with `TODO` comments in `app/page.tsx`) |
-
 🚀 Live Links & Submissions
 Live Web Application: worldcup-oracle-six.vercel.app
 
