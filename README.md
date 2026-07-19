@@ -9,7 +9,7 @@ By introducing an innovative x402-inspired payment routing loop combined with an
 ∆ Smart contract: Solidity, deployed on Injective EVM testnet — handles staking, match lifecycle (open → locked → settled), and proportional payout logic
 ∆ Payments: Injective's x402 protocol for per-request micropayments gating AI analysis
 Cross-chain funding: Circle's CCTP for native USDC transfer into Injective from other chains
-∆ AI analysis: Claude API, generating match previews on unlock
+∆ AI analysis: Gemini API, generating match previews on unlock
 ∆ Backend: Node.js / Express
 ∆ Frontend: Next.js, deployed on Vercel
 ∆ Backend hosting: Render
